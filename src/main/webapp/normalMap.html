@@ -1,0 +1,183 @@
+<html>
+<header>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="javascripts/echarts-all.js"></script>
+    <script type="text/javascript" src="javascripts/jquery-2.1.4.min.js"></script>
+</header>
+<body>
+
+<div id="map" style="width:100%; height:100%;"></div>
+<div style="position:absolute;left:5px;top:5px;width:80px;height:30px">
+    <input type="radio" name="option" value="正常率"  onmousedown="normalRate();" checked>
+    <label style="font-size: 12px;">正常率</label><br>
+    <input type="radio" name="option" value="机器数" onmousedown="numMachine();">
+    <label style="font-size: 12px;">机器数</label><br>
+    <input type="radio" name="option" value="存储" onmousedown="storage();">
+    <label style="font-size: 12px;">存储</label>
+</div>
+<script>
+    var interval = reInterval(0);
+    function normalRate(){
+        clearInterval(interval);
+        interval = reInterval(0);
+    };
+    function numMachine(){
+        clearInterval(interval);
+        interval = reInterval(1);
+    };
+    function storage(){
+        clearInterval(interval);
+        interval = reInterval(2);
+    }
+    function reInterval(type){
+        function doRender(){
+
+            $(document).ready(function(){
+                $.ajax({
+                    type : "GET",
+                    url : "provdata.do",
+                    dataType : "json",
+                    success : function(data) {
+                        var dataNew = [];
+                        var maxValue;
+                        var name;
+                        if(type == 0){
+                            dataNew.push({name: "合肥", value: data[0].normalRate});
+                            dataNew.push({name: "北京", value: data[3].normalRate});
+                            dataNew.push({name: "成都", value: data[4].normalRate});
+                            dataNew.push({name: "上海", value: data[5].normalRate});
+                            dataNew.push(    {name: "东莞", value: data[6].normalRate});
+                            dataNew.push(   {name: "兰州", value: data[7].normalRate});
+                            dataNew.push(   {name: "武汉", value: data[8].normalRate});
+                            dataNew.push(   {name: "南京", value: data[9].normalRate});
+                            dataNew.push(  {name: "乌鲁木齐", value: data[1].normalRate});
+                            dataNew.push(  {name: "昆明", value: data[2].normalRate});
+                            maxValue = 1;
+                            name="正常率";
+                        }else if(type == 1){
+                            dataNew.push({name: "合肥", value: data[0].machineCount});
+                            dataNew.push({name: "北京", value: data[3].machineCount});
+                            dataNew.push({name: "成都", value: data[4].machineCount});
+                            dataNew.push({name: "上海", value: data[5].machineCount});
+                            dataNew.push(    {name: "东莞", value: data[6].machineCount});
+                            dataNew.push(   {name: "兰州", value: data[7].machineCount});
+                            dataNew.push(   {name: "武汉", value: data[8].machineCount});
+                            dataNew.push(   {name: "南京", value: data[9].machineCount});
+                            dataNew.push(  {name: "乌鲁木齐", value: data[1].machineCount});
+                            dataNew.push(  {name: "昆明", value: data[2].machineCount});
+                            maxValue = 100;
+                            name = "机器数";
+                        }else if(type == 2){
+
+                            dataNew.push({name: "合肥", value: parseFloat(data[0].storage.substr(0,data[0].storage.length-2))});
+                            dataNew.push({name: "北京", value: parseFloat(data[3].storage.substr(0,data[3].storage.length-2))});
+                            dataNew.push({name: "成都", value: parseFloat(data[4].storage.substr(0,data[4].storage.length-2))});
+                            dataNew.push({name: "上海", value: parseFloat(data[5].storage.substr(0,data[5].storage.length-2))});
+                            dataNew.push(    {name: "东莞", value: parseFloat(data[6].storage.substr(0,data[6].storage.length-2))});
+                            dataNew.push(   {name: "兰州", value: parseFloat(data[7].storage.substr(0,data[7].storage.length-2))});
+                            dataNew.push(   {name: "武汉", value: parseFloat(data[8].storage.substr(0,data[8].storage.length-2))});
+                            dataNew.push(   {name: "南京", value: parseFloat(data[9].storage.substr(0,data[9].storage.length-2))});
+                            dataNew.push(  {name: "乌鲁木齐", value: parseFloat(data[1].storage.substr(0,data[1].storage.length-2))});
+                            dataNew.push(  {name: "昆明", value:parseFloat(data[2].storage.substr(0,data[2].storage.length-2))});
+                            maxValue = 300;
+                            name = "存储";
+                        }
+
+                        option = {
+                            tooltip : {
+                                trigger: 'item'
+                            },
+                            legend: {
+                                show:false,
+                                data:['rate']
+                            },
+                            dataRange: {
+                                min : 0,
+                                max : maxValue,
+                                calculable : true,
+                                color: ['lightgreen','yellow','red'],
+                            },
+                            toolbox: {
+                                show : false
+                            },
+                            series : [
+                                {
+                                    name: name,
+                                    type: 'map',
+                                    mapType: 'china',
+                                    hoverable: false,
+                                    roam:true,
+                                    data : [],
+                                    markPoint : {
+                                        symbolSize: 5,       // 标注大小，半宽（半径）参数，当图形为方向或菱形则总宽度为symbolSize * 2
+                                        itemStyle: {
+                                            normal: {
+                                                borderColor: '#87cefa',
+                                                borderWidth: 1,            // 标注边线线宽，单位px，默认为1
+                                                label: {
+                                                    show: false
+                                                }
+                                            },
+                                            emphasis: {
+                                                borderColor: '#1e90ff',
+                                                borderWidth: 5,
+                                                label: {
+                                                    show: false
+                                                }
+                                            }
+                                        },
+                                        data : dataNew
+                                    },
+                                    geoCoord: {
+                                        "合肥":[117.27,31.86],
+                                        "北京":[116.46,39.92],
+                                        "成都":[104.06,30.67],
+                                        "上海":[121.48,31.22],
+                                        "东莞":[113.75,23.04],
+                                        "兰州":[103.73,36.03],
+                                        "武汉":[114.31,30.52],
+                                        "南京":[118.78,32.04],
+                                        "乌鲁木齐":[87.68,43.77],
+                                        "昆明":[102.73,25.04]
+                                    }
+                                },
+                                {
+                                    name: " ",
+                                    type: 'map',
+                                    mapType: 'china',
+                                    data:[],
+                                    markPoint : {
+                                        symbol:'emptyCircle',
+                                        symbolSize : function (v){
+                                            return 10 + v/100
+                                        },
+                                        effect : {
+                                            show: true,
+                                            shadowBlur : 0
+                                        },
+                                        itemStyle:{
+                                            normal:{
+                                                label:{show:false}
+                                            }
+                                        },
+                                        data : dataNew
+                                    }
+                                }
+                            ]
+                        };
+                        var myChart = echarts.init(document.getElementById('map'));
+                        myChart.setOption(option);
+                    },
+                    error : function(xhr,status,e) {
+                    }
+                });
+            });
+        }
+        doRender();
+        interval = setInterval(doRender,3000);
+        return interval;
+    }
+
+</script>
+</body>
+</html>
